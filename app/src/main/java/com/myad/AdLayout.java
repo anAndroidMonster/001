@@ -31,7 +31,6 @@ public class AdLayout extends RelativeLayout {
         mContext = context;
         mHandler = new Handler();
         getInParam();
-        addView();
         initData();
     }
 
@@ -59,20 +58,9 @@ public class AdLayout extends RelativeLayout {
         }
         if(mContext instanceof Activity) {
             if(adModel.getType() == 0){
-                getNativeAd(adModel.getaId(), adModel.getbId());
+                getNativeAd(adModel.getAid(), adModel.getBid());
             }
         }
-    }
-
-    private void addView(){
-        TextView textView = new TextView(mContext);
-        textView.setText("加载中...");
-        textView.setTextColor(Color.parseColor("#000000"));
-        textView.setBackgroundColor(Color.parseColor("#88ffffff"));
-        textView.setTextAlignment(TEXT_ALIGNMENT_CENTER);
-        RelativeLayout.LayoutParams params=new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-        params.addRule(RelativeLayout.CENTER_IN_PARENT);
-        addView(textView,params);
     }
 
     private Runnable mRunnable = new Runnable() {

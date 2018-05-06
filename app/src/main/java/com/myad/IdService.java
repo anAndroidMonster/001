@@ -8,6 +8,6 @@ import retrofit2.http.HTTP;
  */
 
 public interface IdService {
-    @HTTP(method = "GET", path = "FirstApplication/master/app/test.xml")
+    @HTTP(method = "GET", path = "001/master/app/test.xml")
     Call<IdAllModel> getBlog();
 }
