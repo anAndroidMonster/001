@@ -5,15 +5,24 @@ package com.myad;
  */
 
 public class IdDetailModel {
-    private String id;
-    private int type;//0banner1原生2开屏
+    private String aId;
+    private String bId;
+    private int type;//0原生
 
-    public String getId() {
-        return id;
+    public String getaId() {
+        return aId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setaId(String aId) {
+        this.aId = aId;
+    }
+
+    public String getbId() {
+        return bId;
+    }
+
+    public void setbId(String bId) {
+        this.bId = bId;
     }
 
     public int getType() {

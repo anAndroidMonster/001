@@ -8,9 +8,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.qq.e.ads.banner.AbstractBannerADListener;
-import com.qq.e.ads.banner.BannerView;
 import com.qq.e.ads.cfg.VideoOption;
 import com.qq.e.ads.nativ.ADSize;
 import com.qq.e.ads.nativ.NativeExpressAD;
@@ -34,6 +31,7 @@ public class AdLayout extends RelativeLayout {
         mContext = context;
         mHandler = new Handler();
         getInParam();
+        addView();
         initData();
     }
 
@@ -54,38 +52,27 @@ public class AdLayout extends RelativeLayout {
 
     private void addAd(){
         String packageName = mContext.getPackageName();
-        String appId = IdHelper.getInstance().getAppId(packageName);
         IdDetailModel adModel = IdHelper.getInstance().getAdModel(packageName, mIndex);
-        if(appId == null || appId.length() <= 0 || adModel == null) {
+        if(adModel == null) {
             AdLayout.this.setVisibility(GONE);
             return;
         }
         if(mContext instanceof Activity) {
             if(adModel.getType() == 0){
-                getBannerAd(appId, adModel.getId());
-            }else if(adModel.getType() == 1) {
-                getNativeAd(appId, adModel.getId());
+                getNativeAd(adModel.getaId(), adModel.getbId());
             }
         }
     }
 
     private void addView(){
         TextView textView = new TextView(mContext);
-        textView.setPadding(15, 15, 15, 15);
-        textView.setText("关闭");
+        textView.setText("加载中...");
         textView.setTextColor(Color.parseColor("#000000"));
         textView.setBackgroundColor(Color.parseColor("#88ffffff"));
-        RelativeLayout.LayoutParams params=new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, 0, 20, 0);
-        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-        params.addRule(RelativeLayout.CENTER_VERTICAL);
+        textView.setTextAlignment(TEXT_ALIGNMENT_CENTER);
+        RelativeLayout.LayoutParams params=new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.CENTER_IN_PARENT);
         addView(textView,params);
-        textView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AdLayout.this.setVisibility(GONE);
-            }
-        });
     }
 
     private Runnable mRunnable = new Runnable() {
@@ -197,38 +184,5 @@ public class AdLayout extends RelativeLayout {
                 .setAutoPlayMuted(true)
                 .build());
         nativeExpressAD.loadAD(1);
-    }
-
-    private void getBannerAd(String appId, String adId){
-        final BannerView banner = new BannerView((Activity) mContext, com.qq.e.ads.banner.ADSize.BANNER, appId, adId);
-        banner.setRefresh(30);
-        banner.loadAD();
-        banner.setADListener(new AbstractBannerADListener() {
-
-            @Override
-            public void onNoAD(AdError error) {
-                if(mHandler != null){
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            AdLayout.this.setVisibility(GONE);
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onADReceiv() {
-                if(mHandler != null){
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            addView(banner);
-                            addView();
-                        }
-                    });
-                }
-            }
-        });
     }
 }

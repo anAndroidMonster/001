@@ -8,8 +8,7 @@ import java.util.List;
 
 public class IdModel {
     private String name;
-    private String first;
-    private List<IdDetailModel> second;
+    private List<IdDetailModel> data;
 
     public String getName() {
         return name;
@@ -19,19 +18,11 @@ public class IdModel {
         this.name = name;
     }
 
-    public String getFirst() {
-        return first;
+    public List<IdDetailModel> getData() {
+        return data;
     }
 
-    public void setFirst(String first) {
-        this.first = first;
-    }
-
-    public List<IdDetailModel> getSecond() {
-        return second;
-    }
-
-    public void setSecond(List<IdDetailModel> second) {
-        this.second = second;
+    public void setData(List<IdDetailModel> data) {
+        this.data = data;
     }
 }

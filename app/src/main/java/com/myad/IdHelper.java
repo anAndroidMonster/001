@@ -30,24 +30,6 @@ public class IdHelper {
         return mInstance;
     }
 
-    public String getAppId(String packageName){
-        String result = "";
-        if(packageName == null || packageName.length() <= 0) return result;
-        if(mData != null){
-            List<IdModel> dataList = mData.getList();
-            if(dataList != null && dataList.size() > 0){
-                for(IdModel data: dataList){
-                    String name = data.getName();
-                    if(name.equals(packageName)){
-                        result = data.getFirst();
-                        break;
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
     public IdDetailModel getAdModel(String packageName, int index){
         IdDetailModel result = null;
         if(packageName == null || packageName.length() <= 0) return result;
@@ -57,7 +39,7 @@ public class IdHelper {
                 for(IdModel data: dataList){
                     String name = data.getName();
                     if(name.equals(packageName)){
-                        List<IdDetailModel> idList = data.getSecond();
+                        List<IdDetailModel> idList = data.getData();
                         if(idList != null && idList.size() > 0 && index >= 0 && index < idList.size()){
                             result = idList.get(index);
                         }
@@ -89,6 +71,7 @@ public class IdHelper {
             @Override
             public void onResponse(Call<IdAllModel> call, Response<IdAllModel> response) {
                 mData = response.body();
+                Log.e("IdHelper", "接口成功");
             }
 
             @Override
