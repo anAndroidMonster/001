@@ -86,6 +86,7 @@ public class AdLayout extends RelativeLayout {
         if (nativeExpressADView != null) {
             nativeExpressADView.destroy();
         }
+        setVisibility(GONE);
     }
 
     private void getNativeAd(String appId, String adId){
