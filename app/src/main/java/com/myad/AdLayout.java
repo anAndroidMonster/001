@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -93,6 +94,7 @@ public class AdLayout extends RelativeLayout {
         NativeExpressAD nativeExpressAD = new NativeExpressAD(mContext, new ADSize(ADSize.FULL_WIDTH, ADSize.AUTO_HEIGHT), appId, adId, new NativeExpressAD.NativeExpressADListener() {
             @Override
             public void onNoAD(AdError adError) {
+                Log.e("tx_gdt", "广告错误:" + adError.getErrorMsg());
                 if(mHandler != null) {
                     mHandler.post(new Runnable() {
                         @Override
