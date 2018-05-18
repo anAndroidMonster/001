@@ -16,6 +16,7 @@ import com.qq.e.ads.nativ.NativeExpressADView;
 import com.qq.e.comm.util.AdError;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by book4 on 2018/1/28.
@@ -24,6 +25,7 @@ import java.util.List;
 public class AdLayout extends RelativeLayout {
     private Context mContext;
     private int mIndex = -1;
+    private int mNum = -1;
     private Handler mHandler;
     private NativeExpressADView nativeExpressADView;
 
@@ -39,7 +41,11 @@ public class AdLayout extends RelativeLayout {
         String tag = getTag().toString();
         if(tag != null && tag.length() > 0){
             try{
-                mIndex = Integer.parseInt(tag);
+                int temp = Integer.parseInt(tag);
+                mIndex = temp % 10;
+                if(temp > 10){
+                    mNum = temp / 10;
+                }
             }catch (NumberFormatException ex){
                 ex.printStackTrace();
             }
@@ -47,7 +53,15 @@ public class AdLayout extends RelativeLayout {
     }
 
     private void initData(){
-        mHandler.post(mRunnable);
+        if(mNum > 1){
+            Random random = new Random();
+            int temp = random.nextInt(mNum);
+            if(temp == 0){
+                mHandler.post(mRunnable);
+            }
+        }else {
+            mHandler.post(mRunnable);
+        }
     }
 
     private void addAd(){
@@ -94,7 +108,6 @@ public class AdLayout extends RelativeLayout {
         NativeExpressAD nativeExpressAD = new NativeExpressAD(mContext, new ADSize(ADSize.FULL_WIDTH, ADSize.AUTO_HEIGHT), appId, adId, new NativeExpressAD.NativeExpressADListener() {
             @Override
             public void onNoAD(AdError adError) {
-                Log.e("tx_gdt", "广告错误:" + adError.getErrorMsg());
                 if(mHandler != null) {
                     mHandler.post(new Runnable() {
                         @Override
