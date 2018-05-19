@@ -2,13 +2,14 @@ package com.myad;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Handler;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewParent;
+import android.widget.AbsListView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import com.qq.e.ads.cfg.VideoOption;
 import com.qq.e.ads.nativ.ADSize;
 import com.qq.e.ads.nativ.NativeExpressAD;
@@ -16,7 +17,6 @@ import com.qq.e.ads.nativ.NativeExpressADView;
 import com.qq.e.comm.util.AdError;
 
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by book4 on 2018/1/28.
@@ -25,27 +25,75 @@ import java.util.Random;
 public class AdLayout extends RelativeLayout {
     private Context mContext;
     private int mIndex = -1;
-    private int mNum = -1;
     private Handler mHandler;
     private NativeExpressADView nativeExpressADView;
+    private final String Tag = "adLayout";
+    private AbsListView mlv;
+    private RecyclerView mRv;
+    private boolean mHaveParent;
+    private int mPosition = -1;
+    private boolean isGetAd;
+    private View mVItem;
+    private int mRecycleTime;
 
     public AdLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
         mHandler = new Handler();
         getInParam();
-        initData();
+
+    }
+
+    private void getMyParent(){
+        if(mHaveParent){
+            return;
+        }else{
+            mHaveParent = true;
+        }
+        ViewParent parent = null;
+        ViewParent itemView = null;
+        for(int i=0; i<10; i++){
+            if(parent == null) {
+                parent = getParent();
+                itemView = parent;
+            }else{
+                itemView = parent;
+                parent = parent.getParent();
+            }
+            if(parent == null){
+                break;
+            }else {
+                Log.d(Tag, "父亲" + parent.getClass().getSimpleName());
+                if(parent instanceof AbsListView){
+                    mlv = (AbsListView) parent;
+                    mVItem = (View) itemView;
+                    if(mPosition == 0){
+                        mlv.setRecyclerListener(new AbsListView.RecyclerListener() {
+                            @Override
+                            public void onMovedToScrapHeap(View view) {
+                                if(view == mVItem){
+                                    mRecycleTime += 1;
+                                    if(mRecycleTime%2 == 1){
+                                        removeAllViews();
+                                    }else{
+                                        initData();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }else if(parent instanceof RecyclerView){
+                    mRv = (RecyclerView) parent;
+                }
+            }
+        }
     }
 
     private void getInParam(){
         String tag = getTag().toString();
         if(tag != null && tag.length() > 0){
             try{
-                int temp = Integer.parseInt(tag);
-                mIndex = temp % 10;
-                if(temp > 10){
-                    mNum = temp / 10;
-                }
+                mIndex = Integer.parseInt(tag);
             }catch (NumberFormatException ex){
                 ex.printStackTrace();
             }
@@ -53,14 +101,11 @@ public class AdLayout extends RelativeLayout {
     }
 
     private void initData(){
-        if(mNum > 1){
-            Random random = new Random();
-            int temp = random.nextInt(mNum);
-            if(temp == 0){
-                mHandler.post(mRunnable);
-            }
-        }else {
+        if(mPosition == 0){
+            Log.d(Tag, "直接请求" + mPosition);
             mHandler.post(mRunnable);
+        }else{
+            Log.d(Tag, "不请求" + mPosition);
         }
     }
 
@@ -68,7 +113,6 @@ public class AdLayout extends RelativeLayout {
         String packageName = mContext.getPackageName();
         IdDetailModel adModel = IdHelper.getInstance().getAdModel(packageName, mIndex);
         if(adModel == null) {
-            AdLayout.this.setVisibility(GONE);
             return;
         }
         if(mContext instanceof Activity) {
@@ -92,7 +136,22 @@ public class AdLayout extends RelativeLayout {
     };
 
     @Override
-    protected void onDetachedFromWindow() {
+    protected void onWindowVisibilityChanged(int visibility) {//用于界面不可见
+        super.onWindowVisibilityChanged(visibility);
+        if (visibility == View.VISIBLE){
+            Log.d(Tag, "可见");
+            if(mPosition < 0){
+                mPosition = PositionHelper.getInstance().getPosition(mContext);
+            }
+            getMyParent();
+
+            initData();
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {//用于界面销毁
+        PositionHelper.getInstance().clearPosition(mContext);
         super.onDetachedFromWindow();
         if(mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
@@ -101,25 +160,30 @@ public class AdLayout extends RelativeLayout {
         if (nativeExpressADView != null) {
             nativeExpressADView.destroy();
         }
-        setVisibility(GONE);
+        Log.d(Tag, "销毁");
     }
 
     private void getNativeAd(String appId, String adId){
+        if(isGetAd){
+            return;
+        }
+        synchronized (AdLayout.class){
+            if(isGetAd){
+                return;
+            }else{
+                isGetAd = true;
+            }
+        }
+        Log.d(Tag, "刷新ad");
         NativeExpressAD nativeExpressAD = new NativeExpressAD(mContext, new ADSize(ADSize.FULL_WIDTH, ADSize.AUTO_HEIGHT), appId, adId, new NativeExpressAD.NativeExpressADListener() {
             @Override
             public void onNoAD(AdError adError) {
-                if(mHandler != null) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            AdLayout.this.setVisibility(GONE);
-                        }
-                    });
-                }
+                isGetAd = false;
             }
 
             @Override
             public void onADLoaded(List<NativeExpressADView> list) {
+                isGetAd = false;
                 if (nativeExpressADView != null) {
                     nativeExpressADView.destroy();
                 }
@@ -130,6 +194,8 @@ public class AdLayout extends RelativeLayout {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            removeAllViews();
+                            Log.d(Tag, "添加广告");
                             addView(nativeExpressADView);
                         }
                     });
@@ -158,14 +224,7 @@ public class AdLayout extends RelativeLayout {
 
             @Override
             public void onADClosed(NativeExpressADView nativeExpressADView) {
-                if(mHandler != null){
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            AdLayout.this.setVisibility(GONE);
-                        }
-                    });
-                }
+
             }
 
             @Override
