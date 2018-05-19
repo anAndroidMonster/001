@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,7 +15,7 @@ import java.util.Map;
 
 public class PositionHelper {
     private static PositionHelper mInstance;
-    private Map<String, Integer> mMap = new HashMap<>();
+    private Map<String, List<Integer>> mMap = new HashMap<>();
     private final String Tag = "positionHelp";
 
     public static PositionHelper getInstance(){
@@ -32,23 +34,31 @@ public class PositionHelper {
         if(context instanceof Activity){
             String name = ((Activity) context).getLocalClassName();
             if(mMap.containsKey(name)){
-                int size = mMap.get(name);
-                result = size+1;
+                List<Integer> list = mMap.get(name);
+                result = list.get(list.size() - 1) + 1;
+                list.add(result);
             }else{
-                result = 1;
+                List<Integer> list = new ArrayList<>();
+                result = 0;
+                list.add(result);
+                mMap.put(name, list);
             }
-            mMap.put(name, result);
-            Log.d(Tag, "getPos:" + name + "," + result);
+            Log.d(Tag, "新增" + result);
+            return result;
+        }else{
+            return result;
         }
-        return result-1;
     }
 
-    public void clearPosition(Context context){
+    public void removePosition(Context context, int position){
         if(context instanceof Activity){
             String name = ((Activity) context).getLocalClassName();
             if(mMap.containsKey(name)){
-                mMap.remove(name);
-                Log.d(Tag, "clearPos:" + name);
+                List<Integer> list = mMap.get(name);
+                if(list.contains(position)){
+                    list.remove(Integer.valueOf(position));
+                    Log.d(Tag, "删除" + position);
+                }
             }
         }
     }

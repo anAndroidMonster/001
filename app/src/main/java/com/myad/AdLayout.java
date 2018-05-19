@@ -63,7 +63,6 @@ public class AdLayout extends RelativeLayout {
             if(parent == null){
                 break;
             }else {
-                Log.d(Tag, "父亲" + parent.getClass().getSimpleName());
                 if(parent instanceof AbsListView){
                     mlv = (AbsListView) parent;
                     mVItem = (View) itemView;
@@ -84,6 +83,7 @@ public class AdLayout extends RelativeLayout {
                     }
                 }else if(parent instanceof RecyclerView){
                     mRv = (RecyclerView) parent;
+                    mVItem = (View) itemView;
                 }
             }
         }
@@ -101,8 +101,21 @@ public class AdLayout extends RelativeLayout {
     }
 
     private void initData(){
-        if(mPosition == 0){
+        if(mlv != null){
+            startRun(mPosition == 0);
+        }else if(mRv != null){
+            startRun(mPosition % 10 == 0);
+        }else{
+            startRun(mPosition == 0);
+        }
+    }
+
+    private void startRun(boolean isDo){
+        if(isDo){
             Log.d(Tag, "直接请求" + mPosition);
+            if(mHandler == null) {
+                mHandler = new Handler();
+            }
             mHandler.post(mRunnable);
         }else{
             Log.d(Tag, "不请求" + mPosition);
@@ -144,14 +157,14 @@ public class AdLayout extends RelativeLayout {
                 mPosition = PositionHelper.getInstance().getPosition(mContext);
             }
             getMyParent();
-
+            //用于普通的首次和recycle的不断回收
             initData();
         }
     }
 
     @Override
     protected void onDetachedFromWindow() {//用于界面销毁
-        PositionHelper.getInstance().clearPosition(mContext);
+        PositionHelper.getInstance().removePosition(mContext, mPosition);
         super.onDetachedFromWindow();
         if(mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
@@ -160,7 +173,7 @@ public class AdLayout extends RelativeLayout {
         if (nativeExpressADView != null) {
             nativeExpressADView.destroy();
         }
-        Log.d(Tag, "销毁");
+        Log.d(Tag, "销毁" + mPosition);
     }
 
     private void getNativeAd(String appId, String adId){
