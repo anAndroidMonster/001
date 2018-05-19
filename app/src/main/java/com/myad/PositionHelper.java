@@ -35,7 +35,14 @@ public class PositionHelper {
             String name = ((Activity) context).getLocalClassName();
             if(mMap.containsKey(name)){
                 List<Integer> list = mMap.get(name);
-                result = list.get(list.size() - 1) + 1;
+                if(list == null){
+                    list = new ArrayList<>();
+                }
+                if(list.size() > 0) {
+                    result = list.get(list.size() - 1) + 1;
+                }else{
+                    result = 0;
+                }
                 list.add(result);
             }else{
                 List<Integer> list = new ArrayList<>();
