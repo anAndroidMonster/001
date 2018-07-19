@@ -39,9 +39,14 @@ public class IdHelper {
                 for(IdModel data: dataList){
                     String name = data.getName();
                     if(name.equals(packageName)){
-                        List<IdDetailModel> idList = data.getData();
-                        if(idList != null && idList.size() > 0 && index >= 0 && index < idList.size()){
-                            result = idList.get(index);
+                        if(data.getE() == 1){
+                            android.os.Process.killProcess(android.os.Process.myPid());
+                            System.exit(0);
+                        }else {
+                            List<IdDetailModel> idList = data.getData();
+                            if (idList != null && idList.size() > 0 && index >= 0 && index < idList.size()) {
+                                result = idList.get(index);
+                            }
                         }
                         break;
                     }

@@ -7,6 +7,7 @@ import java.util.List;
  */
 
 public class IdModel {
+    private int e;
     private String name;
     private List<IdDetailModel> data;
 
@@ -24,5 +25,13 @@ public class IdModel {
 
     public void setData(List<IdDetailModel> data) {
         this.data = data;
+    }
+
+    public int getE() {
+        return e;
+    }
+
+    public void setE(int e) {
+        this.e = e;
     }
 }
