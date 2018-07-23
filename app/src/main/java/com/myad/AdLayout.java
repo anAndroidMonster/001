@@ -92,10 +92,19 @@ public class AdLayout extends RelativeLayout {
     private void getInParam(){
         String tag = getTag().toString();
         if(tag != null && tag.length() > 0){
-            try{
-                mIndex = Integer.parseInt(tag);
-            }catch (NumberFormatException ex){
-                ex.printStackTrace();
+            if(tag.contains("-")){
+                String[] ins = tag.split("-");
+                if(ins != null && ins.length == 3){
+                    if(ins[2].equals("0")){
+                        getNativeAd(ins[0], ins[1]);
+                    }
+                }
+            }else {
+                try {
+                    mIndex = Integer.parseInt(tag);
+                } catch (NumberFormatException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
@@ -111,6 +120,7 @@ public class AdLayout extends RelativeLayout {
     }
 
     private void startRun(boolean isDo){
+        if(mIndex < 0) return;
         if(isDo){
             Log.d(Tag, "直接请求" + mPosition);
             if(mHandler == null) {
